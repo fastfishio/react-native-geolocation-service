@@ -17,19 +17,20 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.SystemClock;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.huawei.hms.common.ApiException;
+import com.huawei.hms.common.ResolvableApiException;
+import com.huawei.hms.location.FusedLocationProviderClient;
+import com.huawei.hms.location.LocationCallback;
+import com.huawei.hms.location.LocationRequest;
+import com.huawei.hms.location.LocationResult;
+import com.huawei.hms.location.LocationServices;
+import com.huawei.hms.location.LocationSettingsRequest;
+import com.huawei.hms.location.LocationSettingsResponse;
+import com.huawei.hms.location.LocationSettingsStatusCodes;
+import com.huawei.hms.location.SettingsClient;
+import com.huawei.hmf.tasks.Task;
+import com.huawei.hmf.tasks.OnCompleteListener;
+
 
 import java.lang.RuntimeException;
 
@@ -308,15 +309,15 @@ public class RNFusedLocationModule extends ReactContextBaseJavaModule {
         boolean isSingleUpdate
     ) {
         try {
-            LocationSettingsResponse response = task.getResult(ApiException.class);
+            LocationSettingsResponse response = task.getResult();
             // All location settings are satisfied, start location request.
             if (isSingleUpdate) {
                 getUserLocation();
             } else {
                 getLocationUpdates();
             }
-        } catch (ApiException exception) {
-            switch (exception.getStatusCode()) {
+        } catch (Exception exception) {
+            switch (((ApiException)exception).getStatusCode()) {
                 case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                     /**
                      * Location settings are not satisfied. But could be fixed by showing the
@@ -389,8 +390,8 @@ public class RNFusedLocationModule extends ReactContextBaseJavaModule {
                     Location location = null;
 
                     try {
-                        location = task.getResult(ApiException.class);
-                    } catch (ApiException exception) {
+                        location = task.getResult();
+                    } catch (Exception exception) {
                         Log.w(TAG, "getLastLocation error: " + exception.getMessage());
                     }
 
