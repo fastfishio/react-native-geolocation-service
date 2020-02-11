@@ -304,81 +304,27 @@ public class RNFusedLocationModule extends ReactContextBaseJavaModule {
      * Check location setting response and decide whether to proceed with
      * location request or not.
      */
-    private void onLocationSettingsResponse(
-        Task<LocationSettingsResponse> task,
-        boolean isSingleUpdate
-    ) {
-        try {
-            LocationSettingsResponse response = task.getResult();
-            // All location settings are satisfied, start location request.
-            if (isSingleUpdate) {
-                getUserLocation();
-            } else {
-                getLocationUpdates();
-            }
-        } catch (Exception exception) {
-            switch (((ApiException)exception).getStatusCode()) {
-                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                    /**
-                     * Location settings are not satisfied. But could be fixed by showing the
-                     * user a dialog. It means either location serivce is not enabled or
-                     * default location mode is not enough to perform the request.
-                     */
-                    if(!mShowLocationDialog) {
-                        invokeError(
-                            LocationError.SETTINGS_NOT_SATISFIED.getValue(),
-                            "Location settings are not satisfied.",
-                            isSingleUpdate
-                        );
-                        break;
-                    }
+     private void onLocationSettingsResponse(
+           Task<LocationSettingsResponse> task,
+           boolean isSingleUpdate
+       ) {
+           try {
+               LocationSettingsResponse response = task.getResult();
+               // All location settings are satisfied, start location request.
+               if (isSingleUpdate) {
+                   getUserLocation();
+               } else {
+                   getLocationUpdates();
+               }
+           } catch (Exception exception) {
+               invokeError(
+                       LocationError.SETTINGS_NOT_SATISFIED.getValue(),
+                       "Location settings are not satisfied.",
+                       isSingleUpdate
+               );
 
-                    try {
-                        ResolvableApiException resolvable = (ResolvableApiException) exception;
-                        Activity activity = getCurrentActivity();
-
-                        if (activity == null) {
-                            invokeError(
-                                LocationError.INTERNAL_ERROR.getValue(),
-                                "Tried to open location dialog while not attached to an Activity",
-                                isSingleUpdate
-                            );
-                            break;
-                        }
-
-                        resolvable.startResolutionForResult(
-                            activity,
-                            isSingleUpdate ? REQUEST_SETTINGS_SINGLE_UPDATE : REQUEST_SETTINGS_CONTINUOUS_UPDATE
-                        );
-                    } catch (SendIntentException e) {
-                        invokeError(
-                            LocationError.INTERNAL_ERROR.getValue(),
-                            "Internal error occurred",
-                            isSingleUpdate
-                        );
-                    } catch (ClassCastException e) {
-                        invokeError(
-                            LocationError.INTERNAL_ERROR.getValue(),
-                            "Internal error occurred",
-                            isSingleUpdate
-                        );
-                    }
-
-                    break;
-                default:
-                    // TODO: we may have to handle other use case here.
-                    // For now just say that settings are not ok.
-                    invokeError(
-                        LocationError.SETTINGS_NOT_SATISFIED.getValue(),
-                        "Location settings are not satisfied.",
-                        isSingleUpdate
-                    );
-
-                    break;
-            }
-        }
-    }
-
+           }
+       }
     /**
      * Get last known location if it exists, otherwise request a new update.
      */
